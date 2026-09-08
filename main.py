@@ -55,10 +55,18 @@ if not os.path.exists(MODEL_FILE):
     pipeline = build_pipeline(num_attribs, cat_attribs)
     housing_prepared = pipeline.fit_transform(housing_features)
 
-    model = RandomForestRegressor()
+    model = RandomForestRegressor(
+        n_estimators=100,
+        max_depth=20,
+        min_samples_split=5,
+        min_samples_leaf=2,
+        random_state=42,
+        n_jobs=-1
+    )
+
     model.fit(housing_prepared, housing_labels)
 
-    joblib.dump(model, MODEL_FILE)
+    joblib.dump(model, MODEL_FILE, compress=3)
     joblib.dump(pipeline, PIPELINE_FILE)
     print("Model is trained successfully, Congrats !")
 
