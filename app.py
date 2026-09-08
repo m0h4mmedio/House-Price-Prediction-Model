@@ -1,7 +1,11 @@
 """Interactive house-value prediction app.
+
+Run with: streamlit run app.py
+Keep model.pkl and pipeline.pkl in this same directory.
 """
 
 from pathlib import Path
+from textwrap import dedent
 
 import joblib
 import numpy as np
@@ -9,7 +13,9 @@ import pandas as pd
 import streamlit as st
 
 
-st.set_page_config(page_title="California RealEstate Agent", page_icon="🏠", layout="wide")
+st.set_page_config(
+    page_title="California RealEstate Agent", page_icon="🏠", layout="wide"
+)
 
 
 @st.cache_resource(show_spinner="Loading the trained prediction model…")
@@ -181,13 +187,13 @@ with st.sidebar:
     st.image("https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=900&q=80")
     st.header("Your California RealEstate Agent is ready to help")
     st.write(
-        "A hands-on machine-learning project that turns housing details into an estimated median home value."
+        "A hands-on machine-learning app that turns housing details into an estimated median home value."
     )
     st.divider()
     st.subheader("How to use it")
     st.markdown(
         """
-        1. Choose a real example or randomly select from the dataset.
+        1. Choose a real example or enter your own home details.
         2. Click **Predict house value**.
         3. Review the estimate and, for examples, compare it with the known sale value.
 
@@ -195,7 +201,7 @@ with st.sidebar:
         """
     )
     st.divider()
-    st.caption("Created by m0h4mmedio · First ML project")
+    st.caption("Created by m0h4mmedio")
 
 
 st.markdown(
@@ -324,7 +330,8 @@ if "reference_results" in st.session_state:
     display_results["Error (%)"] = display_results["Error (%)"].map(lambda value: f"{value:.1f}%")
     st.dataframe(display_results, use_container_width=True, hide_index=True)
     st.bar_chart(
-        reference_results.set_index("Example")[["Recorded value", "Model prediction"]]
+        reference_results.set_index("Example")[["Recorded value", "Model prediction"]],
+        height=260,
     )
 
 
@@ -360,7 +367,13 @@ if "last_prediction" in st.session_state:
         estimate_col.metric("Model estimate", f"${prediction:,.0f}")
         actual_col.metric("Recorded value", f"${actual_price:,.0f}")
         accuracy_col.metric("Difference", f"${difference:,.0f}", f"{error_percent:.1f}% from recorded value")
-        st.bar_chart(pd.DataFrame({"Value (USD)": [prediction, actual_price]}, index=["Model estimate", "Recorded value"]))
+        st.bar_chart(
+            pd.DataFrame(
+                {"Value (USD)": [prediction, actual_price]},
+                index=["Model estimate", "Recorded value"],
+            ),
+            height=260,
+        )
         if error_percent <= 10:
             st.success("Strong example result: the estimate is within 10% of the recorded value.")
         else:
@@ -375,23 +388,26 @@ if "last_prediction" in st.session_state:
 
 
 with st.expander("🧠 Meet the creator & see how this project works", expanded=False):
-    st.markdown(
+    st.markdown(dedent(
         """
         ### Hi, I'm m0h4mmedio
 
-        Welcome to my first machine-learning web application. I built HomeValue Studio to make a model feel less like a black box: you can change a home's details, see an estimate immediately, and test it against real examples from the California Housing dataset.
+        I built California RealEstate Agent to make a model feel less like a black box: you can change a home's details, see an estimate immediately, and test it against real examples from the California Housing dataset.
+
+        **Dataset:** [California Housing Prices on Kaggle](https://www.kaggle.com/datasets/camnugent/california-housing-prices)
 
         ### Behind the prediction
 
-        I trained a regression model on California neighbourhood data. The app collects nine inputs: geographic position, home age, room and bedroom counts, population, households, median income, and proximity to the ocean. A saved **pipeline** prepares the numeric and categorical values exactly as it did during training—for example, encoding ocean proximity—and the saved **model** converts those prepared features into a predicted median value.
+        I trained a **Random Forest Regressor** on California neighbourhood data. The app collects nine inputs: geographic position, home age, room and bedroom counts, population, households, median income, and proximity to the ocean. A saved **pipeline** prepares the numeric and categorical values exactly as it did during training—for example, encoding ocean proximity—and the saved **model** combines many decision trees to produce a predicted median value.
 
         ### Tools I used
 
         - **Python** for the application logic
         - **Pandas** and **NumPy** for structured data
-        - **scikit-learn** for the preprocessing pipeline and regression model
+        - **scikit-learn** for the preprocessing pipeline and Random Forest model
         - **Joblib** to save and reload the trained artifacts
         - **Streamlit** to turn the model into this interactive web experience
-.
+
+        This is an educational price estimate, not a professional property appraisal. Housing markets move, and features such as condition, renovations, schools, and exact street location can matter greatly.
         """
-    )
+    ))
