@@ -167,16 +167,42 @@ st.session_state.setdefault("active_example", None)
 st.markdown(
     """
     <style>
-      .stApp { background: linear-gradient(135deg, #f6fbf7 0%, #edf4ff 100%); }
+      /* Light theme */
+      .stApp { background: linear-gradient(135deg, #f6fbf7 0%, #edf4ff 100%); color: #132b3a; }
       .hero { padding: 1.4rem 1.7rem; border-radius: 20px; color: white;
               background: linear-gradient(110deg, #0d5c4d, #1678a5); margin-bottom: 1.25rem; }
+      .hero, .hero * { color: #ffffff !important; }
       .hero h1 { margin: 0; font-size: 2.2rem; }
       .hero p { margin: .35rem 0 0; font-size: 1.05rem; opacity: .92; }
       .eyebrow { font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; opacity: .78; }
       .watermark { position: fixed; bottom: 14px; right: 24px; z-index: 999;
                    color: rgba(13, 92, 77, .34); font-weight: 800; letter-spacing: .1em;
                    font-size: .78rem; pointer-events: none; }
-      div[data-testid="stMetric"] { background: rgba(255,255,255,.72); border-radius: 14px; padding: .8rem; }
+      div[data-testid="stMetric"] { background: rgba(255,255,255,.82); border-radius: 14px; padding: .8rem;
+                                     border: 1px solid rgba(13, 92, 77, .12); }
+      div[data-testid="stMetric"] label, div[data-testid="stMetric"] [data-testid="stMetricValue"] {
+        color: #132b3a !important;
+      }
+      [data-testid="stSidebar"] { background: rgba(246, 251, 247, .94); }
+
+      /* Dark theme: every custom surface receives its own readable colours. */
+      @media (prefers-color-scheme: dark) {
+        .stApp { background: linear-gradient(135deg, #0b1822 0%, #102b3b 100%); color: #e9f3f7; }
+        [data-testid="stSidebar"] { background: #0e202c; }
+        .watermark { color: rgba(166, 226, 202, .42); }
+        div[data-testid="stMetric"] { background: #152c3b; border-color: #2a5b6e; }
+        div[data-testid="stMetric"] label, div[data-testid="stMetric"] [data-testid="stMetricValue"],
+        .stApp h1, .stApp h2, .stApp h3, .stApp p, .stApp label, .stApp li, .stApp small {
+          color: #e9f3f7 !important;
+        }
+        [data-testid="stForm"], [data-testid="stExpander"] {
+          background: rgba(21, 44, 59, .5); border-color: #2a5b6e;
+        }
+        [data-testid="stNumberInput"] input, [data-baseweb="select"] > div {
+          background-color: #102635 !important; color: #f4f9fb !important;
+          -webkit-text-fill-color: #f4f9fb !important; border-color: #3e7183 !important;
+        }
+      }
     </style>
     <div class="watermark">m0h4mmedio</div>
     """,
