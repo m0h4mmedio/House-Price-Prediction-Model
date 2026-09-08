@@ -184,6 +184,9 @@ st.markdown(
         color: #132b3a !important;
       }
       [data-testid="stSidebar"] { background: rgba(246, 251, 247, .94); }
+      .stButton > button, div[data-testid="stFormSubmitButton"] > button {
+        border: 1px solid #1678a5; border-radius: 9px; font-weight: 700;
+      }
 
       /* Dark theme: every custom surface receives its own readable colours. */
       @media (prefers-color-scheme: dark) {
@@ -201,6 +204,13 @@ st.markdown(
         [data-testid="stNumberInput"] input, [data-baseweb="select"] > div {
           background-color: #102635 !important; color: #f4f9fb !important;
           -webkit-text-fill-color: #f4f9fb !important; border-color: #3e7183 !important;
+        }
+        .stButton > button, div[data-testid="stFormSubmitButton"] > button {
+          background-color: #1a6988 !important; color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important; border-color: #6ec5e6 !important;
+        }
+        .stButton > button:hover, div[data-testid="stFormSubmitButton"] > button:hover {
+          background-color: #2388ad !important; border-color: #b5ecff !important;
         }
       }
     </style>
