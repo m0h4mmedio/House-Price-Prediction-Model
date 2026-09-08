@@ -33,9 +33,11 @@ def load_model():
     return joblib.load(model_path), joblib.load(pipeline_path)
 
 
-# These are real observations from the California Housing dataset. Values are in USD.
+# These are real California Housing observations. To turn this into a strict
+# held-out test report, replace these records with rows from your X_test/y_test split.
+# Values are the dataset's recorded median house values in USD.
 EXAMPLES = {
-    "Bay view starter home — $452,600": {
+    "Example 01 · Bay view starter home — $452,600": {
         "longitude": -122.23,
         "latitude": 37.88,
         "housing_median_age": 41.0,
@@ -47,7 +49,7 @@ EXAMPLES = {
         "ocean_proximity": "NEAR BAY",
         "actual_price": 452600.0,
     },
-    "Bay Area family home — $358,500": {
+    "Example 02 · Bay Area family home — $358,500": {
         "longitude": -122.22,
         "latitude": 37.86,
         "housing_median_age": 21.0,
@@ -59,7 +61,7 @@ EXAMPLES = {
         "ocean_proximity": "NEAR BAY",
         "actual_price": 358500.0,
     },
-    "Established Bay home — $352,100": {
+    "Example 03 · Established Bay home — $352,100": {
         "longitude": -122.24,
         "latitude": 37.85,
         "housing_median_age": 52.0,
@@ -70,6 +72,66 @@ EXAMPLES = {
         "median_income": 7.2574,
         "ocean_proximity": "NEAR BAY",
         "actual_price": 352100.0,
+    },
+    "Example 04 · Mature Bay home — $341,300": {
+        "longitude": -122.25,
+        "latitude": 37.85,
+        "housing_median_age": 52.0,
+        "total_rooms": 1274.0,
+        "total_bedrooms": 235.0,
+        "population": 558.0,
+        "households": 219.0,
+        "median_income": 5.6431,
+        "ocean_proximity": "NEAR BAY",
+        "actual_price": 341300.0,
+    },
+    "Example 05 · Compact Bay home — $342,200": {
+        "longitude": -122.25,
+        "latitude": 37.85,
+        "housing_median_age": 52.0,
+        "total_rooms": 1627.0,
+        "total_bedrooms": 280.0,
+        "population": 565.0,
+        "households": 259.0,
+        "median_income": 3.8462,
+        "ocean_proximity": "NEAR BAY",
+        "actual_price": 342200.0,
+    },
+    "Example 06 · Neighbourhood home — $269,700": {
+        "longitude": -122.25,
+        "latitude": 37.85,
+        "housing_median_age": 52.0,
+        "total_rooms": 919.0,
+        "total_bedrooms": 213.0,
+        "population": 413.0,
+        "households": 193.0,
+        "median_income": 4.0368,
+        "ocean_proximity": "NEAR BAY",
+        "actual_price": 269700.0,
+    },
+    "Example 07 · Spacious Bay home — $299,200": {
+        "longitude": -122.25,
+        "latitude": 37.84,
+        "housing_median_age": 52.0,
+        "total_rooms": 2535.0,
+        "total_bedrooms": 489.0,
+        "population": 1094.0,
+        "households": 514.0,
+        "median_income": 3.6591,
+        "ocean_proximity": "NEAR BAY",
+        "actual_price": 299200.0,
+    },
+    "Example 08 · Family neighbourhood home — $241,400": {
+        "longitude": -122.25,
+        "latitude": 37.84,
+        "housing_median_age": 52.0,
+        "total_rooms": 3104.0,
+        "total_bedrooms": 687.0,
+        "population": 1157.0,
+        "households": 647.0,
+        "median_income": 3.1200,
+        "ocean_proximity": "NEAR BAY",
+        "actual_price": 241400.0,
     },
 }
 
@@ -211,6 +273,62 @@ def matching_actual_price(data: pd.DataFrame) -> float | None:
         if numeric_match and submitted["ocean_proximity"] == example["ocean_proximity"]:
             return float(example["actual_price"])
     return None
+
+
+def compare_reference_examples() -> pd.DataFrame:
+    """Run every reference record through the production prediction pipeline."""
+    example_names = list(EXAMPLES)
+    records = list(EXAMPLES.values())
+    features = pd.DataFrame(
+        [{field: record[field] for field in DEFAULT_HOME} for record in records]
+    )
+    actual_values = np.array([record["actual_price"] for record in records])
+    model, pipeline = load_model()
+    predicted_values = np.asarray(model.predict(pipeline.transform(features)), dtype=float)
+    difference = predicted_values - actual_values
+
+    return pd.DataFrame(
+        {
+            "Example": [name.split(" · ")[0] for name in example_names],
+            "Recorded value": actual_values,
+            "Model prediction": predicted_values,
+            "Difference": difference,
+            "Error (%)": np.abs(difference) / actual_values * 100,
+        }
+    )
+
+
+st.divider()
+st.subheader("📊 Accuracy playground")
+st.write(
+    "Let visitors test all eight reference homes at once and see where the model is closest to, or furthest from, the recorded value."
+)
+st.caption(
+    "For a formal test-set score, replace the eight records in `EXAMPLES` with rows from the exact test split used during training."
+)
+
+if st.button("Run 8-home comparison", use_container_width=False):
+    try:
+        st.session_state["reference_results"] = compare_reference_examples()
+    except Exception as error:
+        st.error(f"I couldn't run the comparison: {error}")
+
+if "reference_results" in st.session_state:
+    reference_results = st.session_state["reference_results"]
+    absolute_differences = reference_results["Difference"].abs()
+    result_one, result_two, result_three = st.columns(3)
+    result_one.metric("Mean absolute difference", f"${absolute_differences.mean():,.0f}")
+    result_two.metric("Average percentage error", f"{reference_results['Error (%)'].mean():.1f}%")
+    result_three.metric("Closest prediction", f"${absolute_differences.min():,.0f} away")
+
+    display_results = reference_results.copy()
+    for column in ("Recorded value", "Model prediction", "Difference"):
+        display_results[column] = display_results[column].map(lambda value: f"${value:,.0f}")
+    display_results["Error (%)"] = display_results["Error (%)"].map(lambda value: f"{value:.1f}%")
+    st.dataframe(display_results, use_container_width=True, hide_index=True)
+    st.bar_chart(
+        reference_results.set_index("Example")[["Recorded value", "Model prediction"]]
+    )
 
 
 if predict_button:
