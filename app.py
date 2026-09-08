@@ -1,7 +1,4 @@
 """Interactive house-value prediction app.
-
-Run with: streamlit run app.py
-Keep model.pkl and pipeline.pkl in this same directory.
 """
 
 from pathlib import Path
@@ -12,7 +9,7 @@ import pandas as pd
 import streamlit as st
 
 
-st.set_page_config(page_title="HomeValue Studio", page_icon="🏠", layout="wide")
+st.set_page_config(page_title="California RealEstate Agent", page_icon="🏠", layout="wide")
 
 
 @st.cache_resource(show_spinner="Loading the trained prediction model…")
@@ -182,15 +179,15 @@ st.markdown(
 
 with st.sidebar:
     st.image("https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=900&q=80")
-    st.header("Welcome to HomeValue Studio")
+    st.header("Your California RealEstate Agent is ready to help")
     st.write(
-        "A hands-on first machine-learning project that turns housing details into an estimated median home value."
+        "A hands-on machine-learning project that turns housing details into an estimated median home value."
     )
     st.divider()
     st.subheader("How to use it")
     st.markdown(
         """
-        1. Choose a real example or enter your own home details.
+        1. Choose a real example or randomly select from the dataset.
         2. Click **Predict house value**.
         3. Review the estimate and, for examples, compare it with the known sale value.
 
@@ -205,7 +202,7 @@ st.markdown(
     """
     <div class="hero">
       <div class="eyebrow">California housing intelligence</div>
-      <h1>🏠 HomeValue Studio</h1>
+      <h1>🏠 California RealEstate Agent</h1>
       <p>Explore a home, make a prediction, and understand the number behind it.</p>
     </div>
     """,
@@ -395,7 +392,6 @@ with st.expander("🧠 Meet the creator & see how this project works", expanded=
         - **scikit-learn** for the preprocessing pipeline and regression model
         - **Joblib** to save and reload the trained artifacts
         - **Streamlit** to turn the model into this interactive web experience
-
-        This is an educational price estimate, not a professional property appraisal. Housing markets move, and features such as condition, renovations, schools, and exact street location can matter greatly.
+.
         """
     )
